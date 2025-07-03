@@ -67,6 +67,7 @@ if __name__ == "__main__":
 
     frames = transform.aug_video(original_frames) # T x 3 x 224 x 224
     list_of_features = []
+    list_of_latents = []
     for i in range(0, frames.shape[1], stride):
         sel_frames = frames[i:i+segment_length,:, :, :]
         if sel_frames.shape[0] < segment_length:
@@ -76,5 +77,7 @@ if __name__ == "__main__":
         with torch.no_grad():
             y = model(sel_frames.cuda())
             features = y["features"][0].cpu().numpy()
+            latents = y['latent'][0].cpu().numpy()
             list_of_features.append(features)
+            list_of_latents.append(latents)
 
