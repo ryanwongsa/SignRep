@@ -6,11 +6,12 @@ from tqdm import tqdm
 
 from pathlib import Path
 from argparse import ArgumentParser
+import cv2
 
 
 if __name__ == "__main__":
     model_params = {
-        "ckpt_dir": None, 
+        "ckpt_dir": None,
         "backbone_params": {"drop_path_rate": 0.1, "num_cls_tokens": 0},
         "out_dim": 768,
         "mask_ratio": 0.0,
@@ -40,22 +41,40 @@ if __name__ == "__main__":
         },
     }
 
+    ckpt_dir = "<ckpt_dir>"
+    video_dir = "<video_dir>"
+    stride = 2 
+    segment_length = 16 
+    
     transform = Transformation()
 
     model = Model(**model_params)
-    ckpt_dir = (
-        "<CHECKPOINT PATH>"
-    )
+
     res = model.load_state_dict(torch.load(ckpt_dir)["model"])
     print(res)
     model.cuda()
     model.eval()
 
-    
-    frames = np.zeros((16, 224,224,3))
-    frames = transform.aug_video(frames).permute(1, 0, 2, 3)
-    frames = frames.unsqueeze(0) # used to create a batch dimension
-    # input frames B x 3 x 16 x 224 x 224
-    with torch.no_grad():
-        y = model(frames.cuda())
-        features = y["features"].cpu().numpy()
+    video_path = Path(video_dir)
+    cap = cv2.VideoCapture(str(video_path))
+    original_frames = []
+    while cap.isOpened():
+        ret, frame = cap.read()
+        if not ret:
+            break
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        original_frames.append(frame)
+
+    frames = transform.aug_video(original_frames) # T x 3 x 224 x 224
+    list_of_features = []
+    for i in range(0, frames.shape[1], stride):
+        sel_frames = frames[i:i+segment_length,:, :, :]
+        if sel_frames.shape[0] < segment_length:
+            continue
+        sel_frames = sel_frames.unsqueeze(0).permute(0, 2, 1, 3, 4)  # B x 3 x 16 x 224 x 224
+
+        with torch.no_grad():
+            y = model(sel_frames.cuda())
+            features = y["features"][0].cpu().numpy()
+            list_of_features.append(features)
+
