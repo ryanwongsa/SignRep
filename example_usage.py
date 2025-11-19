@@ -16,7 +16,7 @@ if __name__ == "__main__":
         "out_dim": 768,
         "mask_ratio": 0.0,
         "init_weights": False,
-        "cls_head_name": "models.head_models.dict_head_v6_FINAL_thoughtful",
+        "cls_head_name": "models.head_models.dict_head_v6_FINAL_thoughtful", # head to predict sign priors
         "cls_head_params": {
             "latents_params": {"hidden_dim": 512, "out_dim": 384},
             "total_frames": 16,

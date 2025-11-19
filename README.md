@@ -18,7 +18,7 @@ SignRep contains research code and models for "SignRep: Enhancing Self-Supervise
 
 ## Requirements
 
-We provide a minimal `requirements.txt` with the most common runtime dependencies used by the example script. 
+We provide a minimal `requirements.txt` with the dependencies used by the example script. 
 Install using a virtual environment (example):
 
 ```bash
@@ -27,7 +27,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-## Example usage
+## Usage
 
 See `example_usage.py` for a compact example that:
 
